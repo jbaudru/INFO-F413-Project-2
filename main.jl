@@ -38,15 +38,15 @@ function readableCnf(formula)
 end
 
 # ==============================================================================
-function lasVegas(formula)
+function lasVegas(formula, nb_clause, nb_var)
     # Assign random truth value to the variable
     varvalue = Dict()
-    for i = 1:26
+    for i = 1:nb_var
         varvalue[i] = rand((0, 1))
     end
 
     nb_satisf_clause = 0
-    for i = 1:91
+    for i = 1:nb_clause
         var::UInt8 = varvalue[abs(formula[i, 1])]
         if (formula[i,1]< 0)
             if (var == 0) var = 1
@@ -68,7 +68,7 @@ function lasVegas(formula)
         end
     end
     #println("Clauses satisf. : ", nb_satisf_clause, "/91")
-    return nb_satisf_clause/91
+    return nb_satisf_clause/nb_clause
 end
 
 # ==============================================================================
@@ -79,46 +79,61 @@ function getData(filename)
     content = readlines(f)
     formula = zeros(Int, 91, 3)
     cmpt = 1; var_cmpt = 1
+    nb_clause = 0; nb_var = 0
     for line in content
-        if (length(line) > 2 && line[1] != 'c' && line[1] != 'p' && line[1] != '%' && line[1] != '0')
-            for var in split(line, ' ', keepempty=false)
-                x = parse(Int64, var)
-                if (x!=0)
-                    formula[cmpt, var_cmpt] = x
-                    var_cmpt += 1
-                else
-                    cmpt += 1
-                    var_cmpt = 1
+        if (length(line) > 2 && line[1] != 'c' && line[1] != '%' && line[1] != '0')
+            if (line[1] == 'p')
+                lst = split(line, ' ', keepempty=false)
+                nb_clause = parse(Int64, lst[end])
+                nb_var = parse(Int64, lst[3])
+                formula = zeros(Int, nb_clause, 3)
+            else
+                for var in split(line, ' ', keepempty=false)
+                    x = parse(Int64, var)
+                    if (x!=0)
+                        formula[cmpt, var_cmpt] = x
+                        var_cmpt += 1
+                    else
+                        cmpt += 1
+                        var_cmpt = 1
+                    end
                 end
             end
         end
     end
     close(f)
-    return formula
+    return formula, nb_clause, nb_var
 end
 
-function lasVegasAll(formula)
+function lasVegasAll(formula, nb_clause, nb_var)
     nb_try = 1
-    success = lasVegas(formula)
+    success = lasVegas(formula, nb_clause, nb_var)
     while (success < 7/8)
-        success = lasVegas(formula)
+        success = lasVegas(formula, nb_clause, nb_var)
         nb_try += 1
     end
-    #println("Algorithm succeeded with ", success,"% of success.")
     return success
 end
 
 # ==============================================================================
 function main()
     # For each file in the folder
-    for i=1:1000
-        filename = "cnf_example/uf20-0" * string(i) * ".cnf"
-        println("On file : ", filename)
-        formula = getData(filename)
-        #readableCnf(formula)
-        time = @elapsed lasVegasAll(formula)
-        println("Algorithm spend ", time,"sec. computing.")
-        println("")
+    folder_dic = Dict("uf20-91/uf20-0" => 1000, "uf50-218/uf50-0" => 1000, "uf75-325/uf75-0" => 100, "uf100-430/uf100-0" => 1000, "uf125-538/uf125-0" => 100, "uf150-645/uf150-0" => 100, "uf175-753/uf175-0" => 100, "uf200-860/uf200-0" => 100, "uf225-960/uf225-0" => 100, "uf250-1065/uf250-0" => 100)
+    for (filename_tmp, nb_file) in folder_dic
+        println("FOLDER : ",filename_tmp ," (", nb_file,")")
+        avg_time = 0
+        avg_success = 0
+        for i=1:nb_file # For each file in the folder
+            filename = filename_tmp * string(i) * ".cnf"
+            formula, nb_clause, nb_var = getData(filename)
+            #readableCnf(formula)
+            avg_time += @elapsed lasVegasAll(formula, nb_clause, nb_var)
+            avg_success += lasVegasAll(formula, nb_clause, nb_var)
+            #println("Algorithm spend ", time,"sec. computing.")
+            #println("")
+        end
+        println("   Avg. time : ", avg_time/nb_file)
+        println("   Avg. success : ", avg_success/nb_file)
     end
 end
 
