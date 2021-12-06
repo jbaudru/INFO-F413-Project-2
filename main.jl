@@ -5,6 +5,7 @@
 # ==============================================================================
 
 using Printf
+using Plots
 
 # ==============================================================================
 # Print the formula in human readable form
@@ -118,7 +119,12 @@ end
 # ==============================================================================
 function main()
     # For each file in the folder
-    folder_dic = Dict("uf20-91/uf20-0" => 1000, "uf50-218/uf50-0" => 1000, "uf75-325/uf75-0" => 100, "uf100-430/uf100-0" => 1000, "uf125-538/uf125-0" => 100, "uf150-645/uf150-0" => 100, "uf175-753/uf175-0" => 100, "uf200-860/uf200-0" => 100, "uf225-960/uf225-0" => 100, "uf250-1065/uf250-0" => 100)
+    folder_dic = Dict{String, Integer}("0uf20-91/uf20-0" => 1000, "1uf50-218/uf50-0" => 1000, "2uf75-325/uf75-0" => 100, "3uf100-430/uf100-0" => 1000, "4uf125-538/uf125-0" => 100, "5uf150-645/uf150-0" => 100, "6uf175-753/uf175-0" => 100, "7uf200-860/uf200-0" => 100, "8uf225-960/uf225-0" => 100, "9uf250-1065/uf250-0" => 100)
+    folder_dic = sort(collect(folder_dic))
+
+    x = [20, 50, 75, 100, 125, 150, 175, 200, 225, 250]
+    y = zeros(0)
+    z = zeros(0)
     for (filename_tmp, nb_file) in folder_dic
         println("FOLDER : ",filename_tmp ," (", nb_file,")")
         avg_time = 0
@@ -129,12 +135,19 @@ function main()
             #readableCnf(formula)
             avg_time += @elapsed lasVegasAll(formula, nb_clause, nb_var)
             avg_success += lasVegasAll(formula, nb_clause, nb_var)
-            #println("Algorithm spend ", time,"sec. computing.")
-            #println("")
         end
         println("   Avg. time : ", avg_time/nb_file)
         println("   Avg. success : ", avg_success/nb_file)
+        println()
+        append!(y, avg_time/nb_file)
+        append!(z, avg_success/nb_file)
     end
+    # TODO : Axes titles
+    # TODO : Correct tick axes
+    plot(x, z, title = "Average success by number of variable in 3SAT")
+    savefig("results1.png")
+    plot(x, y, title = "Average running time by number of variable in 3SAT")
+    savefig("results2.png")
 end
 
 # ==============================================================================
