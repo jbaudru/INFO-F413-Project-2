@@ -132,11 +132,17 @@ function main()
     # TODO : Correct tick axes
     # TODO : Add plot to report
     plot(x, z, title = "Average success per number of variable in 3SAT")
-    savefig("results1.png")
+    savefig("img/results1.png")
     plot(x, y, title = "Average running time per number of variable in 3SAT")
-    savefig("results2.png")
+    savefig("img/results2.png")
     plot(x, w, title = "Average number of trials per number of variable in 3SAT")
-    savefig("results3.png")
+    savefig("img/results3.png")
+    plot(xx, z, title = "Average success per number of clause in 3SAT")
+    savefig("img/results4.png")
+    plot(xx, y, title = "Average running time per number of clause in 3SAT")
+    savefig("img/results5.png")
+    plot(xx, w, title = "Average number of trials per number of clause in 3SAT")
+    savefig("img/results6.png")
 end
 
 

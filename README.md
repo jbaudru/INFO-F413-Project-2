@@ -8,3 +8,4 @@ This code is written in **Julia 1.7.0**, it has been realized in the framework o
 
 ## Results
 Below, the different comparative graphs of the implemented algorithm :
+![alt text](Isolated.png "Title")
