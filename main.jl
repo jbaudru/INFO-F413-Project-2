@@ -131,6 +131,8 @@ function main()
     # TODO : Axes titles
     # TODO : Correct tick axes
     # TODO : Add plot to report
+    # TODO : Make general average
+    # TODO : Change all data type
     plot(x, z, title = "Average success per number of variable in 3SAT")
     savefig("img/results1.png")
     plot(x, y, title = "Average running time per number of variable in 3SAT")
