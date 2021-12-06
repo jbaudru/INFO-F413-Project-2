@@ -12,7 +12,7 @@ using Printf
 function readableCnf(formula)
     formul = ""
     varname = Dict()
-    for i = 1:26
+    for i = 1:26x
         c = Char(96 + i)
         varname[i] = c
     end
