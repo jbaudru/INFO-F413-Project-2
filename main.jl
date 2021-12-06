@@ -67,8 +67,7 @@ function lasVegas(formula)
             nb_satisf_clause += 1
         end
     end
-    println("Clauses satisf. : ", nb_satisf_clause, "/91")
-    println("Success : ", nb_satisf_clause/91, " | Expected : ", 7/8)
+    #println("Clauses satisf. : ", nb_satisf_clause, "/91")
     return nb_satisf_clause/91
 end
 
@@ -98,16 +97,29 @@ function getData(filename)
     return formula
 end
 
+function lasVegasAll(formula)
+    nb_try = 1
+    success = lasVegas(formula)
+    while (success < 7/8)
+        success = lasVegas(formula)
+        nb_try += 1
+    end
+    #println("Algorithm succeeded with ", success,"% of success.")
+    return success
+end
+
 # ==============================================================================
 function main()
     # For each file in the folder
-    formula = getData("cnf_example/uf20-01.cnf")
-    #readableCnf(formula)
-    nb_try = 1
-    while (success = lasVegas(formula) < 7/8)
-        nb_try += 1
+    for i=1:1000
+        filename = "cnf_example/uf20-0" * string(i) * ".cnf"
+        println("On file : ", filename)
+        formula = getData(filename)
+        #readableCnf(formula)
+        time = @elapsed lasVegasAll(formula)
+        println("Algorithm spend ", time,"sec. computing.")
+        println("")
     end
-    println("Algorithm succeeded after ", nb_try, " tries.")
 end
 
 # ==============================================================================
