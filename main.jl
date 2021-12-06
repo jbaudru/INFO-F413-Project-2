@@ -1,6 +1,14 @@
+# ==============================================================================
+# BAUDRU Julien - 000460130
+# Project 2 - December 2021
+# INFO-F413 - Data structures and algorithm
+# ==============================================================================
+
 using Printf
 
+# ==============================================================================
 # Print the formula in human readable form
+# ==============================================================================
 function readableCnf(formula)
     formul = ""
     varname = Dict()
@@ -29,6 +37,7 @@ function readableCnf(formula)
     println(formul)
 end
 
+# ==============================================================================
 function lasVegas(formula)
     # Assign random truth value to the variable
     varvalue = Dict()
@@ -63,7 +72,9 @@ function lasVegas(formula)
     return nb_satisf_clause/91
 end
 
+# ==============================================================================
 # Getting data from the cnf files
+# ==============================================================================
 function getData(filename)
     f = open(filename, "r")
     content = readlines(f)
@@ -87,15 +98,17 @@ function getData(filename)
     return formula
 end
 
-
+# ==============================================================================
 function main()
     # For each file in the folder
     formula = getData("cnf_example/uf20-01.cnf")
     #readableCnf(formula)
-    success = lasVegas(formula)
-    while (success < 7/8)
-        success = lasVegas(formula)
+    nb_try = 1
+    while (success = lasVegas(formula) < 7/8)
+        nb_try += 1
     end
+    println("Algorithm succeeded after ", nb_try, " tries.")
 end
 
+# ==============================================================================
 main()
