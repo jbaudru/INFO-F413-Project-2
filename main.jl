@@ -8,39 +8,6 @@ using Printf
 using Plots
 
 # ==============================================================================
-# Print the formula in human readable form
-# ==============================================================================
-"""
-function readableCnf(formula)
-    formul = ""
-    varname = Dict()
-    for i = 1:26x
-        c = Char(96 + i)
-        varname[i] = c
-    end
-    for i = 1:91
-        tmp_form = ""
-        for k in 1:3
-            if (formula[i, k] < 0) # NOT
-                tmp_form*= "¬"
-            end
-            tmp_form *= string(varname[abs(formula[i, k])])
-            if (k != 3)
-                tmp_form *= " ∨ "
-            end
-        end
-        formul *= "("
-        formul *= tmp_form
-        formul *= ")"
-        if (i != 91)
-            formul *= " ∧ "
-        end
-    end
-    println(formul)
-end
-"""
-
-# ==============================================================================
 # Getting data from the cnf files
 # ==============================================================================
 function getData(filename)
@@ -121,15 +88,22 @@ end
 # ==============================================================================
 function main()
     # For each file in the folder
-    folder_dic = Dict{String, Integer}("0uf20-91/uf20-0" => 1000, "1uf50-218/uf50-0" => 1000, "2uf75-325/uf75-0" => 100, "3uf100-430/uf100-0" => 1000, "4uf125-538/uf125-0" => 100, "5uf150-645/uf150-0" => 100, "6uf175-753/uf175-0" => 100, "7uf200-860/uf200-0" => 100, "8uf225-960/uf225-0" => 100, "9uf250-1065/uf250-0" => 100)
+    folder_dic = Dict{String, Integer}("data/0uf20-91/uf20-0" => 1000, "data/1uf50-218/uf50-0" => 1000, "data/2uf75-325/uf75-0" => 100, "data/3uf100-430/uf100-0" => 1000, "data/4uf125-538/uf125-0" => 100, "data/5uf150-645/uf150-0" => 100, "data/6uf175-753/uf175-0" => 100, "data/7uf200-860/uf200-0" => 100, "data/8uf225-960/uf225-0" => 100, "data/9uf250-1065/uf250-0" => 100)
     folder_dic = sort(collect(folder_dic))
 
     x = [20, 50, 75, 100, 125, 150, 175, 200, 225, 250]
+    xx = [91, 218, 325, 430, 538, 645, 753, 860, 960, 1065]
     y = zeros(0) # time
     z = zeros(0) # success
     w = zeros(0) # tries
+    cmpt = 1
     for (filename_tmp, nb_file) in folder_dic
-        println("FOLDER : ",filename_tmp ," (", nb_file,")")
+        println("Data : ", filename_tmp)
+        print("Nb. variables : ")
+        printstyled(x[cmpt]; color = :yellow)
+        print("\nNb. clauses : ")
+        printstyled(xx[cmpt]; color = :yellow)
+        cmpt+=1
         avg_time = 0
         avg_success = 0
         avg_try = 0
@@ -145,10 +119,14 @@ function main()
         append!(y, avg_time/nb_file)
         append!(z, avg_success/nb_file)
         append!(w, avg_try/nb_file)
-        println("   Avg. time : ", avg_time/nb_file)
-        println("   Avg. success : ", avg_success/nb_file)
-        println("   Avg. try : ", avg_try/nb_file)
-        println()
+        println("\nResults :")
+        printstyled("   Avg. time : "; color = :green)
+        print(avg_time/nb_file)
+        printstyled("\n   Avg. success : ", color = :green)
+        print(avg_success/nb_file)
+        printstyled("\n   Avg. try : ", color = :green)
+        print(avg_try/nb_file)
+        println("\n")
     end
     # TODO : Axes titles
     # TODO : Correct tick axes
@@ -161,5 +139,5 @@ function main()
     savefig("results3.png")
 end
 
-# ==============================================================================
+
 main()
