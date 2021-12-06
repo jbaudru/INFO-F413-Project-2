@@ -29,8 +29,38 @@ function readableCnf(formula)
     println(formul)
 end
 
-function LasVegas(formula)
+function lasVegas(formula)
+    # Assign random truth value to the variable
+    varvalue = Dict()
+    for i = 1:26
+        varvalue[i] = rand((0, 1))
+    end
 
+    nb_satisf_clause = 0
+    for i = 1:91
+        var::UInt8 = varvalue[abs(formula[i, 1])]
+        if (formula[i,1]< 0)
+            if (var == 0) var = 1
+            else var = 0
+            end
+        end
+        isClauseSatisfied = var
+        for k in 2:3
+            var = varvalue[abs(formula[i, k])]
+            if (formula[i,k]< 0)
+                if (var == 0) var = 1
+                else var = 0
+                end
+            end
+            isClauseSatisfied |= var
+        end
+        if (isClauseSatisfied == 1)
+            nb_satisf_clause += 1
+        end
+    end
+    println("Clauses satisf. : ", nb_satisf_clause, "/91")
+    println("Success : ", nb_satisf_clause/91, " | Expected : ", 7/8)
+    return nb_satisf_clause/91
 end
 
 # Getting data from the cnf files
@@ -61,7 +91,11 @@ end
 function main()
     # For each file in the folder
     formula = getData("cnf_example/uf20-01.cnf")
-    readableCnf(formula)
+    #readableCnf(formula)
+    success = lasVegas(formula)
+    while (success < 7/8)
+        success = lasVegas(formula)
+    end
 end
 
 main()
