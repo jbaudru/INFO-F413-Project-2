@@ -12,14 +12,13 @@ using Plots
 # ==============================================================================
 function getData(filename)
     f = open(filename, "r")
-    content = readlines(f)
-    formula = zeros(Int, 91, 3)
-    cmpt::UInt16 = 1; var_cmpt::UInt16 = 1
-    nb_clause::UInt16 = 0; nb_var::UInt16 = 0
+    content::Vector{String} = readlines(f)
+    formula = zeros(Int32, 91, 3)
+    cmpt::UInt16 = 1; var_cmpt::UInt16 = 1; nb_clause::UInt16 = 0; nb_var::UInt16 = 0
     for line in content
         if (length(line) > 2 && line[1] != 'c' && line[1] != '%' && line[1] != '0')
             if (line[1] == 'p')
-                lst = split(line, ' ', keepempty=false)
+                lst::Vector{String} = split(line, ' ', keepempty=false)
                 nb_clause = parse(Int64, lst[end])
                 nb_var = parse(Int64, lst[3])
                 formula = zeros(Int, nb_clause, 3)
@@ -113,20 +112,18 @@ function main()
         printstyled("\n   Avg. try : ", color = :green); print(avg_try/nb_file)
         println("\n")
     end
-    # TODO : Axes titles
-    # TODO : Correct tick axes
     # TODO : Add plot to report
-    plot(x, z, title = "Average success per number of variable in 3SAT")
+    plot(x, z, xticks = x, title = "Average success per number of variable in 3SAT", xlabel = "Num. of var.", ylabel = "Avg. success")
     savefig("img/results1.png")
-    plot(x, y, title = "Average running time per number of variable in 3SAT")
+    plot(x, y, xticks = x, title = "Average running time per number of variable in 3SAT", xlabel = "Num. of var.", ylabel = "Avg. time")
     savefig("img/results2.png")
-    plot(x, w, title = "Average number of trials per number of variable in 3SAT")
+    plot(x, w, xticks = x, title = "Average number of trials per number of variable in 3SAT", xlabel = "Num. of var.", ylabel = "Avg. tries")
     savefig("img/results3.png")
-    plot(xx, z, title = "Average success per number of clause in 3SAT")
+    plot(xx, z, xticks = xx, title = "Average success per number of clause in 3SAT", xlabel = "Num. of clauses", ylabel = "Avg. success")
     savefig("img/results4.png")
-    plot(xx, y, title = "Average running time per number of clause in 3SAT")
+    plot(xx, y, xticks = xx, title = "Average running time per number of clause in 3SAT", xlabel = "Num. of clauses", ylabel = "Avg. time")
     savefig("img/results5.png")
-    plot(xx, w, title = "Average number of trials per number of clause in 3SAT")
+    plot(xx, w, xticks = xx, title = "Average number of trials per number of clause in 3SAT", xlabel = "Num. of clauses", ylabel = "Avg. tries")
     savefig("img/results6.png")
 end
 
