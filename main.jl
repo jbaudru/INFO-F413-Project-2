@@ -40,28 +40,36 @@ function getData(filename)
     return formula, nb_clause, nb_var
 end
 
-# ==============================================================================
-function lasVegas(formula, nb_clause, nb_var)
+
+function generateTruthValue(nb_var)
     varvalue = Dict()
     for i = 1:nb_var # Assign random truth value to the variable
         varvalue[i] = rand((0, 1))
     end
+    return varvalue
+end
+
+function getNotValue(var_name, var)
+    if (var_name< 0) # If we want the NOT value of the variable
+        if (var == 0) var = 1
+        else var = 0
+        end
+    end
+    return var
+end
+
+# ==============================================================================
+function lasVegas(formula, nb_clause, nb_var)
+    varvalue = generateTruthValue(nb_var)
+
     nb_satisf_clause::Int32 = 0
     for i = 1:nb_clause
         var::Int32 = varvalue[abs(formula[i, 1])]
-        if (formula[i,1]< 0)
-            if (var == 0) var = 1
-            else var = 0
-            end
-        end
-        isClauseSatisfied::Int32 = var
+        var = getNotValue(formula[i,1], var) # If we want the NOT value of the variable
+        isClauseSatisfied::Int32 = 0 # At the beginning the clause is not satisfied
         for k in 2:3
             var = varvalue[abs(formula[i, k])]
-            if (formula[i,k]< 0)
-                if (var == 0) var = 1
-                else var = 0
-                end
-            end
+            var = getNotValue(formula[i,k], var) # If we want the NOT value of the variable
             isClauseSatisfied |= var
         end
         if (isClauseSatisfied == 1)
@@ -97,6 +105,7 @@ function main()
         avg_time::Float32 = 0; avg_success::Float32 = 0; avg_try::Float32 = 0
         for i=1:nb_file # For each file in the folder
             filename = filename_tmp * string(i) * ".cnf"
+            println("  - File : ", filename)
             formula, nb_clause::Int32, nb_var::Int32 = getData(filename)
             avg_time += @elapsed lasVegasRunner(formula, nb_clause, nb_var)
             tmp_success, tmp_try = lasVegasRunner(formula, nb_clause, nb_var)
