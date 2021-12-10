@@ -104,17 +104,15 @@ end
 # Main loop : Run the algo. on multiples files and plots the results
 # ==============================================================================
 function main()
-    filename_tmp = "data/uf20-91/"
+    folder = "data/uf20-91/"
     nb_file = 1000
     xx = zeros(0); x = zeros(0); y = zeros(0); z = zeros(0); w = zeros(0)
     sum_time::Float32 = 0; sum_success::Float32 = 0; sum_try::Float32 = 0; sum_clause::Float32 = 0
     for i=1:nb_file # For each file in the folder
-        if (i!=266)
-            filename = filename_tmp * "uf20-0" * string(i) * ".cnf"
+        if (i!=266) # Buggy file (Note: I think this instance is unsatisfiable)
+            filename = folder * "uf20-0" * string(i) * ".cnf"
             formula, nb_clause::Int32, nb_var::Int32 = getData(filename)
-            print("Nb. variables : "); printstyled(100; color = :yellow)
-            print("\nNb. clauses : "); printstyled(string(nb_clause) * "\n"; color = :yellow)
-            println("   - File : ", filename)
+            println("   File : ", filename)
             tmp_time = @elapsed lasVegasRunner(formula, nb_clause, nb_var)
             sum_time += tmp_time
             tmp_success, tmp_try = lasVegasRunner(formula, nb_clause, nb_var)
@@ -125,7 +123,7 @@ function main()
             printstyled("       Time : "; color = :green); print(tmp_time)
             printstyled("\n       Nb. satis. clauses : ", color = :green); print(tmp_success); print("/"* string(nb_clause))
             printstyled("\n       E[X] = 0.875 : ", color = :green); print(tmp_success/nb_clause)
-            printstyled("\n       Trial(s) : ", color = :green); print(tmp_try)
+            printstyled("\n       Nb. of trial(s) : ", color = :green); print(tmp_try)
             println("\n")
             append!(xx, i)
             append!(y, tmp_time)
@@ -137,12 +135,12 @@ function main()
     printstyled("   Avg. time : "; color = :green); print(sum_time/nb_file)
     printstyled("\n   Avg. satis. clauses : ", color = :green); print(sum_success/nb_file)
     printstyled("\n   E[X] = 0.875 : ", color = :green); print((sum_success/nb_file)/(sum_clause/nb_file))
-    printstyled("\n   Avg. try : ", color = :green); print(sum_try/nb_file)
+    printstyled("\n   Avg. nb. of trials : ", color = :green); print(sum_try/nb_file)
     println("\n")
     plot(xx, z, linecolor = :red, title = "Num. of satisfied clauses per instance", xlabel = "File number", ylabel = "Success")
-    savefig("img/results4.png")
+    savefig("img/results_nb_satisf.png")
     plot(xx, y, linecolor = :red, title = "Running time per instance", xlabel = "File number", ylabel = "Time in sec.")
-    savefig("img/results5.png")
+    savefig("img/results_time.png")
 
 end
 
