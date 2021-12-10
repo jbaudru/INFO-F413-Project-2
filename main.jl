@@ -8,7 +8,7 @@ using Printf
 using Plots
 
 # ==============================================================================
-# Getting data from the cnf files
+# Getting data from the DIMACS format files
 # ==============================================================================
 function getData(filename)
     f = open(filename, "r")
@@ -40,7 +40,9 @@ function getData(filename)
     return formula, nb_clause, nb_var
 end
 
-
+# ==============================================================================
+# Generate random truth value for the variables of a given formula
+# ==============================================================================
 function generateTruthValue(nb_var)
     varvalue = Dict()
     for i = 1:nb_var # Assign random truth value to the variable
@@ -49,6 +51,9 @@ function generateTruthValue(nb_var)
     return varvalue
 end
 
+# ==============================================================================
+# Return a logical not for a given variable
+# ==============================================================================
 function getNotValue(var_name, var)
     if (var_name< 0) # If we want the NOT value of the variable
         if (var == 0) var = 1
@@ -59,9 +64,10 @@ function getNotValue(var_name, var)
 end
 
 # ==============================================================================
+# The famous algorithm
+# ==============================================================================
 function lasVegas(formula, nb_clause, nb_var)
     varvalue = generateTruthValue(nb_var)
-
     nb_satisf_clause::Int32 = 0
     for i = 1:nb_clause
         var::Int32 = varvalue[abs(formula[i, 1])]
@@ -76,63 +82,68 @@ function lasVegas(formula, nb_clause, nb_var)
             nb_satisf_clause += 1
         end
     end
-    return nb_satisf_clause/nb_clause
-end
-
-function lasVegasRunner(formula, nb_clause, nb_var)
-    nb_try::Int32 = 1
-    success::Float32 = lasVegas(formula, nb_clause, nb_var)
-    while (success < 7/8)
-        success = lasVegas(formula, nb_clause, nb_var)
-        nb_try += 1
-    end
-    return success, nb_try
+    return nb_satisf_clause
 end
 
 # ==============================================================================
-function main()
-    folder_dic = Dict{String, Integer}("data/0uf20-91/uf20-0" => 1000, "data/1uf50-218/uf50-0" => 1000, "data/2uf75-325/uf75-0" => 100, "data/3uf100-430/uf100-0" => 1000, "data/4uf125-538/uf125-0" => 100, "data/5uf150-645/uf150-0" => 100, "data/6uf175-753/uf175-0" => 100, "data/7uf200-860/uf200-0" => 100, "data/8uf225-960/uf225-0" => 100, "data/9uf250-1065/uf250-0" => 100)
-    folder_dic = sort(collect(folder_dic))
-    x = [20, 50, 75, 100, 125, 150, 175, 200, 225, 250]
-    xx = [91, 218, 325, 430, 538, 645, 753, 860, 960, 1065]
-    y = zeros(0); z = zeros(0); w = zeros(0) # tries
-    cmpt::Int32 = 1
-    for (filename_tmp, nb_file) in folder_dic
-        println("Data : ", filename_tmp)
-        print("Nb. variables : "); printstyled(x[cmpt]; color = :yellow)
-        print("\nNb. clauses : "); printstyled(xx[cmpt]; color = :yellow)
-        cmpt+=1
-        avg_time::Float32 = 0; avg_success::Float32 = 0; avg_try::Float32 = 0
-        for i=1:nb_file # For each file in the folder
-            filename = filename_tmp * string(i) * ".cnf"
-            println("  - File : ", filename)
-            formula, nb_clause::Int32, nb_var::Int32 = getData(filename)
-            avg_time += @elapsed lasVegasRunner(formula, nb_clause, nb_var)
-            tmp_success, tmp_try = lasVegasRunner(formula, nb_clause, nb_var)
-            avg_success += tmp_success
-            avg_try += tmp_try
-        end
-        append!(y, avg_time/nb_file)
-        append!(z, avg_success/nb_file)
-        append!(w, avg_try/nb_file)
-        println("\nResults :")
-        printstyled("   Avg. time : "; color = :green); print(avg_time/nb_file)
-        printstyled("\n   Avg. success : ", color = :green); print(avg_success/nb_file)
-        printstyled("\n   Avg. try : ", color = :green); print(avg_try/nb_file)
-        println("\n")
+# Run the famous algorithm
+# ==============================================================================
+function lasVegasRunner(formula, nb_clause, nb_var)
+    nb_try::Int32 = 1
+    current_satisf_clause::Float32 = lasVegas(formula, nb_clause, nb_var)
+    sum_nb_satisf_clause::Float32 = 0
+    while (current_satisf_clause < (7*nb_clause)/8) # New truth assignement
+        current_satisf_clause = lasVegas(formula, nb_clause, nb_var)
+        nb_try += 1
+        sum_nb_satisf_clause += current_satisf_clause
     end
-    plot(x, z, xticks = x, title = "Average success per num. of variable in 3SAT", xlabel = "Num. of var.", ylabel = "Avg. success")
-    savefig("img/results1.png")
-    plot(x, y, xticks = x, title = "Average running time per num. of variable in 3SAT", xlabel = "Num. of var.", ylabel = "Avg. time")
-    savefig("img/results2.png")
-    plot(x, w, xticks = x, title = "Average num. of trials per num. of variable in 3SAT", xlabel = "Num. of var.", ylabel = "Avg. tries")
-    savefig("img/results3.png")
-    plot(xx, z, xticks = xx, linecolor = :red, title = "Average success per num. of clause in 3SAT", xlabel = "Num. of clauses", ylabel = "Avg. success")
+    return current_satisf_clause, nb_try
+end
+
+# ==============================================================================
+# Main loop : Run the algo. on multiples files and plots the results
+# ==============================================================================
+function main()
+    filename_tmp = "data/uf20-91/"
+    nb_file = 1000
+    xx = zeros(0); x = zeros(0); y = zeros(0); z = zeros(0); w = zeros(0)
+    sum_time::Float32 = 0; sum_success::Float32 = 0; sum_try::Float32 = 0; sum_clause::Float32 = 0
+    for i=1:nb_file # For each file in the folder
+        if (i!=266)
+            filename = filename_tmp * "uf20-0" * string(i) * ".cnf"
+            formula, nb_clause::Int32, nb_var::Int32 = getData(filename)
+            print("Nb. variables : "); printstyled(100; color = :yellow)
+            print("\nNb. clauses : "); printstyled(string(nb_clause) * "\n"; color = :yellow)
+            println("   - File : ", filename)
+            tmp_time = @elapsed lasVegasRunner(formula, nb_clause, nb_var)
+            sum_time += tmp_time
+            tmp_success, tmp_try = lasVegasRunner(formula, nb_clause, nb_var)
+            sum_success += tmp_success
+            sum_try += tmp_try
+            sum_clause += nb_clause
+            println("   Results :")
+            printstyled("       Time : "; color = :green); print(tmp_time)
+            printstyled("\n       Nb. satis. clauses : ", color = :green); print(tmp_success); print("/"* string(nb_clause))
+            printstyled("\n       E[X] = 0.875 : ", color = :green); print(tmp_success/nb_clause)
+            printstyled("\n       Trial(s) : ", color = :green); print(tmp_try)
+            println("\n")
+            append!(xx, i)
+            append!(y, tmp_time)
+            append!(z, tmp_success)
+            append!(w, tmp_success/nb_clause)
+        end
+    end
+    println("\nResults algorithm :")
+    printstyled("   Avg. time : "; color = :green); print(sum_time/nb_file)
+    printstyled("\n   Avg. satis. clauses : ", color = :green); print(sum_success/nb_file)
+    printstyled("\n   E[X] = 0.875 : ", color = :green); print((sum_success/nb_file)/(sum_clause/nb_file))
+    printstyled("\n   Avg. try : ", color = :green); print(sum_try/nb_file)
+    println("\n")
+    plot(xx, z, linecolor = :red, title = "Num. of satisfied clauses per instance", xlabel = "File number", ylabel = "Success")
     savefig("img/results4.png")
-    plot(xx, y, xticks = xx, linecolor = :red, title = "Average running time per num. of clause in 3SAT", xlabel = "Num. of clauses", ylabel = "Avg. time")
+    plot(xx, y, linecolor = :red, title = "Running time per instance", xlabel = "File number", ylabel = "Time in sec.")
     savefig("img/results5.png")
-    plot(xx, w, xticks = xx, linecolor = :red,  title = "Average num. of trials per num. of clause in 3SAT", xlabel = "Num. of clauses", ylabel = "Avg. tries")
-    savefig("img/results6.png")
+
 end
 
 
