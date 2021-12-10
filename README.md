@@ -8,9 +8,5 @@ This code is written in **Julia 1.7.0**, it has been realized in the framework o
 
 ## Results
 Below, the different comparative graphs of the implemented algorithm : <br>
-![graph](https://github.com/jbaudru/INFOF413-Project-2/blob/master/img/results1.png?raw=true)
-![graph](https://github.com/jbaudru/INFOF413-Project-2/blob/master/img/results2.png?raw=true)
-![graph](https://github.com/jbaudru/INFOF413-Project-2/blob/master/img/results3.png?raw=true)
-![graph](https://github.com/jbaudru/INFOF413-Project-2/blob/master/img/results4.png?raw=true)
-![graph](https://github.com/jbaudru/INFOF413-Project-2/blob/master/img/results5.png?raw=true)
-![graph](https://github.com/jbaudru/INFOF413-Project-2/blob/master/img/results6.png?raw=true)
+![graph](https://github.com/jbaudru/INFOF413-Project-2/blob/master/img/results_nb_satisf.png?raw=true)
+![graph](https://github.com/jbaudru/INFOF413-Project-2/blob/master/img/results_time.png?raw=true)
